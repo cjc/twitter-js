@@ -29,10 +29,12 @@ app.get('/login', function (req, res) {
 });
 app.get('/response', function (req, res) {
   twitterClient.getAccessToken(req.session.auth, req.url, function (error, token, extras) {
-    console.log(extras);
-    console.log(token);
-    req.session.auth.access_token = token.oauth_token;
-    req.session.auth.access_token_secret = token.oauth_token_secret;
+    req.session.auth = {
+      access_token : token.oauth_token,
+      access_token_secret : token.oauth_token_secret, 
+      screen_name : extras.screen_name, 
+      user_id: extras.user_id
+    };
     res.render('client.jade', {
       layout: false,
       locals: {
@@ -49,9 +51,13 @@ app.post('/message', function (req, res) {
     '/statuses/update.json',
     {status: req.param('message')},
     function (error, result) {
-      console.log(error);
-      console.log(result);
-      res.render('client.jade', {layout: false});
+      if (error) {
+        console.log(error);
+        //TODO: errorpage
+      } else {
+        console.log(result);
+        res.render('client.jade', {layout: false});
+      }
     }
   );
 });
@@ -72,7 +78,7 @@ app.get('/verify', function (req, res) {
 
 app.get('/image', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
+  twitterClient.apiCall(null,null,
     'GET',
     '/users/profile_image/pithic.json',
     {size:'bigger'},
