@@ -5,17 +5,29 @@ var express = require('express'),
     twitterClient = require('./../')(
       process.sparkEnv.twitterKey,
       process.sparkEnv.twitterPass,
-      process.sparkEnv.twitterRedirect
+      process.sparkEnv.twitterRedirect + "response"
     ),
     app = express.createServer(
       connect.bodyDecoder(),
       connect.cookieDecoder(),
-connect.session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }})
+      connect.session({ secret: 'keyboard cat', cookie: { maxAge: 60000 }})
     );
 
 app.set('views', __dirname);
 
-app.get('/', function (req, res) {
+app.get('/login', function (req, res) {
+  twitterClient.getRequestToken(req, res, function (error, token, extras) {
+    console.log(extras);
+    console.log(token);
+    res.render('client.jade', {
+      layout: false,
+      locals: {
+        token: token
+      }
+    });
+  });
+});
+app.get('/response', function (req, res) {
   twitterClient.getAccessToken(req, res, function (error, token, extras) {
     console.log(extras);
     console.log(token);
