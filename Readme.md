@@ -1,5 +1,9 @@
 # twitter-js
 
+## Fork Info
+
+This is a hacked up version of masylums twitter-js with the request/response/session dependencies removed from the twitterclient class. It's still probably broken and you likely want to use masylum's original instead. http://github.com/masylum/twitter-js
+
 Easy peasy twitter client for connect.
 
     npm install twitter-js
