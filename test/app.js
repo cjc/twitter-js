@@ -16,19 +16,16 @@ var express = require('express'),
 app.set('views', __dirname);
 
 app.get('/login', function (req, res) {
-  twitterClient.getRequestToken(req, res, function (error, token, extras) {
-    console.log(extras);
-    console.log(token);
-    res.render('client.jade', {
-      layout: false,
-      locals: {
-        token: token
-      }
-    });
+  req.session.auth = req.session.auth || {};
+  twitterClient.getRequestToken(req.session.auth, function (error, redirectUrl) {
+    if (error) {
+    } else {
+      res.redirect(redirectUrl);
+    }
   });
 });
 app.get('/response', function (req, res) {
-  twitterClient.getAccessToken(req, function (error, token, extras) {
+  twitterClient.getAccessToken(req.session.auth, req.url, function (error, token, extras) {
     console.log(extras);
     console.log(token);
     res.render('client.jade', {
@@ -42,7 +39,7 @@ app.get('/response', function (req, res) {
 
 app.post('/message', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req,
+  twitterClient.apiCall(req.session.auth,
     'POST',
     '/statuses/update.json',
     {status: req.param('message')},
@@ -56,7 +53,7 @@ app.post('/message', function (req, res) {
 
 app.get('/verify', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req,
+  twitterClient.apiCall(req.session.auth,
     'GET',
     '/account/verify_credentials.json',
     {},
@@ -70,7 +67,7 @@ app.get('/verify', function (req, res) {
 
 app.get('/image', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req,
+  twitterClient.apiCall(req.session.auth,
     'GET',
     '/users/profile_image/pithic.json',
     {size:'bigger'},
