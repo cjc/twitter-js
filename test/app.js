@@ -62,20 +62,6 @@ app.post('/message', function (req, res) {
   );
 });
 
-app.get('/verify', function (req, res) {
-  console.log(req.session);
-  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
-    'GET',
-    '/account/verify_credentials.json',
-    {},
-    function (error, result) {
-      console.log(error);
-      console.log(result);
-      res.render('client.jade', {layout: false});
-    }
-  );
-});
-
 app.get('/image', function (req, res) {
   console.log(req.session);
   twitterClient.apiCall(null,null,
