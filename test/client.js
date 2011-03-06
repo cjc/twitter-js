@@ -1,9 +1,3 @@
-/**
- * IMPORTANT:
- * In order to make this test work add
- * 127.0.0.1 twitter-js to your /etc/hosts
- */
-
 process.sparkEnv = process.sparkEnv || {};
 
 var express = require('express'),
@@ -11,7 +5,7 @@ var express = require('express'),
     twitterClient = require('./../')(
       process.sparkEnv.twitterKey,
       process.sparkEnv.twitterPass,
-      'http://localhost:3003/'
+      process.sparkEnv.twitterRedirect
     ),
     app = express.createServer(
       connect.bodyDecoder(),
@@ -36,10 +30,10 @@ app.get('/', function (req, res) {
 
 app.post('/message', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(
+  twitterClient.apiCall(req,
     'POST',
     '/statuses/update.json',
-    {token: {oauth_token_secret: req.session.auth.newsecret, oauth_token: req.session.auth.newtoken},status: req.param('message')},
+    {status: req.param('message')},
     function (error, result) {
       console.log(error);
       console.log(result);
@@ -50,10 +44,10 @@ app.post('/message', function (req, res) {
 
 app.get('/verify', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(
+  twitterClient.apiCall(req,
     'GET',
     '/account/verify_credentials.json',
-    {token: {oauth_token_secret: req.session.auth.newsecret, oauth_token: req.session.auth.newtoken}},
+    {},
     function (error, result) {
       console.log(error);
       console.log(result);
@@ -64,10 +58,10 @@ app.get('/verify', function (req, res) {
 
 app.get('/image', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(
+  twitterClient.apiCall(req,
     'GET',
-    '/users/profile_image/.json',
-    {token: {oauth_token_secret: req.session.auth.newsecret, oauth_token: req.session.auth.newtoken}, size:'bigger'},
+    '/users/profile_image/pithic.json',
+    {size:'bigger'},
     function (error, result) {
       console.log(error);
       console.log(result);
