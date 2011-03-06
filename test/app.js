@@ -28,7 +28,7 @@ app.get('/login', function (req, res) {
   });
 });
 app.get('/response', function (req, res) {
-  twitterClient.getAccessToken(req, res, function (error, token, extras) {
+  twitterClient.getAccessToken(req, function (error, token, extras) {
     console.log(extras);
     console.log(token);
     res.render('client.jade', {
