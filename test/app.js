@@ -17,9 +17,12 @@ app.set('views', __dirname);
 
 app.get('/login', function (req, res) {
   req.session.auth = req.session.auth || {};
-  twitterClient.getRequestToken(req.session.auth, function (error, redirectUrl) {
+  twitterClient.getRequestToken(function (error, redirectUrl, request_token, request_token_secret) {
     if (error) {
+      //TODO errorpage
     } else {
+      req.session.auth.request_token = request_token;
+      req.session.auth.request_token_secret = request_token_secret;
       res.redirect(redirectUrl);
     }
   });
@@ -28,6 +31,8 @@ app.get('/response', function (req, res) {
   twitterClient.getAccessToken(req.session.auth, req.url, function (error, token, extras) {
     console.log(extras);
     console.log(token);
+    req.session.auth.access_token = token.oauth_token;
+    req.session.auth.access_token_secret = token.oauth_token_secret;
     res.render('client.jade', {
       layout: false,
       locals: {
@@ -39,7 +44,7 @@ app.get('/response', function (req, res) {
 
 app.post('/message', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req.session.auth,
+  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
     'POST',
     '/statuses/update.json',
     {status: req.param('message')},
@@ -53,7 +58,7 @@ app.post('/message', function (req, res) {
 
 app.get('/verify', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req.session.auth,
+  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
     'GET',
     '/account/verify_credentials.json',
     {},
@@ -67,7 +72,7 @@ app.get('/verify', function (req, res) {
 
 app.get('/image', function (req, res) {
   console.log(req.session);
-  twitterClient.apiCall(req.session.auth,
+  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
     'GET',
     '/users/profile_image/pithic.json',
     {size:'bigger'},
