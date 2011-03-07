@@ -1,5 +1,5 @@
 process.sparkEnv = process.sparkEnv || {};
-
+var fs = require('fs');
 var express = require('express'),
     connect = require('connect'),
     twitterClient = require('./../')(
@@ -53,10 +53,15 @@ app.post('/message', function (req, res) {
     function (error, result) {
       if (error) {
         console.log(error);
-        //TODO: errorpage
       } else {
+        console.log("Returned");
+        if (error) {
+          console.log("error->");
+          console.log(error);
+        }
+        console.log("result->");
         console.log(result);
-        res.render('client.jade', {layout: false});
+        res.end();
       }
     }
   );
@@ -75,5 +80,40 @@ app.get('/image', function (req, res) {
     }
   );
 });
+
+app.get('/postimage', function (req, res) {
+  var buf = fs.readFileSync('elah.png');
+  var boundary = '----WebKitFormBoundaryVKiDTIiEWXTPeyII';
+  var contenttype ="multipart/form-data;boundary=" + boundary;
+
+  var body = "--" + boundary + "\r\n";
+  body += 'Content-Disposition: form-data; name="image"; filename="twobitme.png"\r\n';
+  body += 'Content-Type: image/png\r\n\r\n';
+  var footer = '\r\n';
+  footer += '--' + boundary + '--\r\n';
+
+  var pb = new Buffer(Buffer.byteLength(body,"ascii") + buf.length + Buffer.byteLength(footer,"ascii"));
+  var counter = pb.write(body, 0, 'ascii');
+  counter += buf.copy(pb, counter, 0, buf.length);
+  counter += pb.write(footer, counter, "ascii");
+  
+  twitterClient.apiCall(req.session.auth.access_token, req.session.auth.access_token_secret,
+    'POST',
+    '/account/update_profile_image.json',
+    pb,
+    function (error, result) {
+      console.log("Returned");
+      if (error) {
+        console.log("error->");
+        console.log(error);
+      }
+      console.log("result->");
+      console.log(result);
+      res.end();
+    },
+    contenttype 
+  );
+});
+
 
 module.exports = app;
